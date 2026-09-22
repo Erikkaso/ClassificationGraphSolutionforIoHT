@@ -20,8 +20,7 @@ import platform
 import time
 from Utilitarios import Constants
 pathBase = Constants.pathBase
-
-pathDataset = "C:\\Users\\junio\\Documents\\Pibic20252026\\Artigo\\Codes\\Graph\\ClassificationGraphSolutionforIoHT\\Server\\Datasets\\Source" + "\\"  
+pathDataset = Constants.pathProjectDataset
 
 print("\n=======Verifica se já existe banco de dados e tabelas e cria conexão==========\n")
 

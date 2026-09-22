@@ -70,10 +70,10 @@ def updateGraph():
     from ModelANNTensorflow import trainModelWithACCGYR, trainModelWithOnlyACC
     from ModelDecisionTreeRandomForestSKLearn import trainDecisionTreeModelAccGyr, trainRandomForestModelAccGyr, trainDecisionTreeModelAcc, trainRandomForestModelAcc
     from Server.graphFunctions import addToGraph, getGraphValues, optimizeGraph
-    from Dataset1 import Dataset1
-    from Dataset2 import Dataset2
-    from DatasetACC import DatasetACC
-    from DatasetACC_GYR import DatasetACC_GYR
+    from Server.Datasets.DatasetManipulation.Format.Dataset1 import Dataset1 
+    from Server.Datasets.DatasetManipulation.Format.Dataset2 import Dataset2
+    from Server.Datasets.DatasetManipulation.Preprocessing.DatasetACC import DatasetACC
+    from Server.Datasets.DatasetManipulation.Preprocessing.DatasetACC_GYR import DatasetACC_GYR
 
     print("=========Initialize Graph Generate Data from Databases===========")
 

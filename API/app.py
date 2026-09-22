@@ -2,7 +2,7 @@ from flask import Flask, jsonify, send_file, send_from_directory
 from Server.DAO.Dao import DAO
 from Server.Database.DBConnection import DBConnection
 from Server.DBInitialize import DBInitialize
-from Server.Utils.XMLCreate import xml_create
+from Server.XMLCreate import xml_create
 import Server.graphFunctions as gF
 import os
 
