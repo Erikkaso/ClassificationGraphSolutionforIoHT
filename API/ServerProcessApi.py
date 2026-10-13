@@ -1,14 +1,11 @@
 import json
+import os
 import requests
 import platform
 
 api_token = 'seu_api_token'
 
-so = platform.system()
-if so == "Windows":
-    api_url_base = 'http://localhost:5000'
-if so == "Linux":
-    api_url_base = 'http://3.86.153.243:3000'
+api_url_base = os.environ.get('API_URL_BASE', 'http://127.0.0.1:3000').rstrip('/')
 
 headers = {'Content-Type': 'application/json',
            'Authorization': 'Bearer {0}'.format(api_token)}
@@ -22,23 +19,34 @@ def get_info(id=None):
     api_url_optmize_with_percentage = '{0}/OptimizeGraphRequest/acc/50'.format(api_url_base)
     api_url = '{0}//api/v1/resources/ngos'.format(api_url_base)
     
+    try:
+        if id == 0:
+            response = requests.get(api_url_model, headers=headers, timeout=10)
+        elif id == 3:
+            response = requests.get(api_url_optmize, headers=headers, timeout=120)
+        elif id == 1:
+            response = requests.get(api_url_model_generated, headers=headers, timeout=10)
+        elif id == 2:
+            response = requests.get(api_url_model_generate, headers=headers, timeout=10)
+        elif id == 4:
+            response = requests.get(api_url_optmize_with_percentage, headers=headers, timeout=120)
+        else:
+            response = requests.get(api_url_base, headers=headers, timeout=10)
+    except requests.RequestException as error:
+        print(f'[!] API indisponível em {api_url_base}: {error}')
+        return None
+
     if id == 0:
-        response = requests.get(api_url_model, headers=headers)
         print(api_url_model)
     elif id == 3:
-        response = requests.get(api_url_optmize, headers=headers)
         print(api_url_optmize)
     elif id == 1:
-        response = requests.get(api_url_model_generated, headers=headers)
         print(api_url_model_generated)
     elif id == 2:
-        response = requests.get(api_url_model_generate, headers=headers)
         print(api_url_model_generate)
     elif id == 4:
-        response = requests.get(api_url_optmize_with_percentage, headers=headers)
         print(api_url_optmize_with_percentage)
     else:
-        response = requests.get(api_url_base, headers=headers)
         print(api_url_base)
     if response.status_code == 200:
         return response.content.decode('utf-8')#json.loads(response.content.decode('utf-8'))

@@ -5,13 +5,12 @@ from bs4 import BeautifulSoup
 from Utilitarios import Constants 
 
 
-def xml_create(edgeSensorFeature, edgeFeaturesModel, edgeModelsFinalStatus, fileName = "KnowledgeBase"):
-    print(fileName)
+def xml_create(edgeSensorFeature, edgeFeaturesModel, edgeModelsFinalStatus, fileName = Constants.graphName):
     #====================Arquivo===============
     feedFileName = fileName
     path = Constants.pathProjectDownloads
     feedFile = path+"\\"+feedFileName+".xml"
-    print(feedFile)
+    
     #====================Montar XML============
     ##====================Cabeçalho===============
     xml = '<KnowledgeRepresentation>\n'
@@ -91,3 +90,4 @@ def xml_create(edgeSensorFeature, edgeFeaturesModel, edgeModelsFinalStatus, file
         f2.write(xml)
     f2.close()
     #print(xml)
+    return feedFile

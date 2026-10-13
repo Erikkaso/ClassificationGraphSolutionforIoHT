@@ -1,0 +1,14 @@
+.git
+.gitignore
+.env
+.idea
+venv
+**/__pycache__
+**/*.pyc
+tests
+docs
+get-pip.py
+teste.txt
+teste1.txt
+Dockerfile
+docker-compose.yml

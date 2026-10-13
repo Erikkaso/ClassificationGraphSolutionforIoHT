@@ -1,17 +1,35 @@
-from flask import Flask, jsonify, send_file, send_from_directory
+import sys
+from pathlib import Path
+
+from flask import Flask, send_file, send_from_directory
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+SERVER_ROOT = PROJECT_ROOT / "Server"
+DOWNLOAD_ROOT = PROJECT_ROOT / "download"
+MODEL_ROOT = SERVER_ROOT / "MLModels" / "saved_models"
+if str(SERVER_ROOT) not in sys.path:
+    sys.path.insert(0, str(SERVER_ROOT))
+
 from Server.DAO.Dao import DAO
-from Server.Database.DBConnection import DBConnection
 from Server.DBInitialize import DBInitialize
 from Server.XMLCreate import xml_create
 import Server.graphFunctions as gF
-import os
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
-app.config['UPLOAD_FOLDER'] = "saved_model"
-db = DBInitialize()
-dao = DAO(db.connection_db)
+app.config['UPLOAD_FOLDER'] = str(MODEL_ROOT)
+db = None
+dao = None
 modelText = ""
+
+
+def get_dao():
+    global db, dao
+    if dao is None:
+        db = DBInitialize()
+        dao = DAO(db.connection_db)
+    return dao
 
 @app.route('/')
 def index():
@@ -37,7 +55,7 @@ def optimizeGraphRequest(sensors):
     global modelText
     print(id)
     sensors = sensors.split("_")
-    graphOptimized = gF.optimizeGraph(dao,sensors)
+    graphOptimized = gF.optimizeGraph(get_dao(),sensors)
     edgeSensorFeaturesO = graphOptimized[0]
     edgeFeatureModelsO = graphOptimized[1] 
     edgeModelFinalStatesO = graphOptimized[2]
@@ -49,7 +67,7 @@ def optimizeGraphRequestPercentage(sensors,percentage):
     global modelText
     print(id)
     sensors = sensors.split("_")
-    graphOptimized = gF.optimizeGraph(dao,sensors,int(percentage)/100)
+    graphOptimized = gF.optimizeGraph(get_dao(),sensors,int(percentage)/100)
     edgeSensorFeaturesO = graphOptimized[0]
     edgeFeatureModelsO = graphOptimized[1] 
     edgeModelFinalStatesO = graphOptimized[2]
@@ -58,26 +76,20 @@ def optimizeGraphRequestPercentage(sensors,percentage):
 
 @app.route('/OptimizeGraphRequest/download.xml')
 def downloadOptimizeGraph():
-    import platform
-    so = platform.system()
-    if so == "Windows":
-        return  send_file("download\\KnowledgeBaseOptimized.xml", as_attachment=True)
-    if so == "Linux":
-        return  send_file("download//KnowledgeBaseOptimized.xml", as_attachment=True)
+    return send_file(DOWNLOAD_ROOT / "KnowledgeBaseOptimized.xml", as_attachment=True)
     
 @app.route('/GraphRequest')
 def downloadGraph():
-    import platform
-    so = platform.system()
-    if so == "Windows":
-        return  send_file("download\\KnowledgeBase.xml", as_attachment=True)
-    if so == "Linux":
-        return  send_file("download//KnowledgeBase.xml", as_attachment=True)
+    return send_file(DOWNLOAD_ROOT / "KnowledgeBase.xml", as_attachment=True)
 
 @app.route('/saved_model/<path:filename>', methods=['GET', 'POST'])
 def download(filename):
-    uploads = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'])
-    return send_from_directory(directory=uploads, path=filename)
+    return send_from_directory(
+        directory=app.config['UPLOAD_FOLDER'],
+        path=filename,
+        as_attachment=True,
+    )
 
 
-app.run()
+if __name__ == "__main__":
+    app.run(port=3000)

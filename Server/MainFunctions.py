@@ -14,6 +14,7 @@ from Datasets.DatasetManipulation.Preprocessing.DatasetACC_GYR import DatasetACC
 from Datasets.DatasetManipulation.Preprocessing.DatasetACC import DatasetACC
 from Datasets.DatasetManipulation.Format.Dataset1 import Dataset1
 from Datasets.DatasetManipulation.Format.Dataset2 import Dataset2
+from JSONConverter import convert_xml_to_json
 
 import os
 import platform
@@ -45,8 +46,8 @@ modelName5 = ["sklearn_model_rf.onnx"]
 modelName6 = ["sklearn_model_rf2.onnx"]
 
 algorithName4 = ["Support Vector Machines"]
-modelName7 = ["acc_model.joblib"]
-modelName8 = ["acc_gyr_model.joblib"]
+modelName7 = ["acc_gyr_model.joblib"]
+modelName8 = ["acc_model.joblib"]
 
 sensorList = [["acc", "accelerometer"], ["gyr","gyroscope"]]
 featureList = ["acc_mean", "acc_max", "acc_min", "acc_std", "acc_kurtosis", "acc_skewness", "acc_entropy", "acc_mad", "acc_iqr","gyr_mean", "gyr_max", "gyr_min", "gyr_std", "gyr_kurtosis", "gyr_skewness", "gyr_entropy", "gyr_mad", "gyr_iqr"]
@@ -70,8 +71,6 @@ end_time = time.perf_counter()
 elapsed_time = end_time - start_time
 print("==Total time processing:" + str(elapsed_time)+"==")
 print("=========end preprocessing=========")
-
-
 
 print("=========trainning===========")
 start_time = time.perf_counter()
@@ -158,28 +157,54 @@ probability = valuesList[1]
 valuesList = valuesList[0]
 addToGraph(dao, valuesList, probability) 
 
-'''
-if so == "Windows":
-    os.system('cls') or None
-if so == "Linux":
-    os.system('clear') or None
-'''
-
 print("\n=======Recupera dados do Banco e Cria o grafo==========\n")
 
 addToGraph(dao, valuesList, probability)
 addToGraph(dao, valuesList2, probability2)
-
-print("\n=======Recupera as arestas e vértices para XML==========\n")
 
 edges = dao.includeEdgeList()
 edgeSensorFeatures = edges[0]
 edgeFeatureModels = edges[1] 
 edgeModelFinalStates = edges[2]
 
-print("\n=======Cria Arquivo XML==========\n")
+print("\n=======Cria Arquivos XML e JSON==========\n")
 
-xml_create(edgeSensorFeatures, edgeFeatureModels, edgeModelFinalStates)
+xmlpath = xml_create(edgeSensorFeatures, edgeFeatureModels, edgeModelFinalStates)
+convert_xml_to_json(xmlpath)
+
+
+print('================================')
+print('==========Grafo Otimizado=============')
+print('================================')
+
+#sensors = ['acc','gyr']
+sensors = ['acc']
+graphOptimized = optimizeGraph(dao,sensors, 0.50)
+edgeSensorFeaturesO = graphOptimized[0]
+edgeFeatureModelsO = graphOptimized[1] 
+edgeModelFinalStatesO = graphOptimized[2]
+
+print("\n=======Cria Arquivos XML e JSON do Grafo Otimizado==========\n")
+xmlpath = xml_create(edgeSensorFeaturesO, edgeFeatureModelsO, edgeModelFinalStatesO, Constants.graphOptimizedName)
+convert_xml_to_json(xmlpath, Constants.graphOptimizedName)
+
+'''
+print("\n=======Recupera as arestas e vértices para XML==========\n")
+print('======edgeSensorFeaturesO========')
+for e in edgeSensorFeaturesO:
+    print(e.Sensor.sensorName + ' - ' + e.Feature.featureName) 
+#print(edgeSensorFeatures)
+
+print('======edgeFeatureModelsO========')
+for e in edgeFeatureModelsO:
+    print(e.Feature.featureName + ' - ' + e.MLModel.titleModel + e.MLModel.modelExtension)
+    print(str(e.MLModel.numInFeature) + ' - ' + str(e.MLModel.numOutFeature))
+
+print('======edgeModelFinalStatesO========')
+for e in edgeModelFinalStatesO:
+    print(e.MLModel.titleModel + e.MLModel.modelExtension + ' - ' + e.FinalState.description)
+    print(str(e.MLModel.numInFeature) + ' - ' + str(e.MLModel.numOutFeature) + ' - ' + str(e.probability))
+'''
 
 
 '''
@@ -195,36 +220,4 @@ for e in edgeFeatureModels:
 print('======edgeModelFinalStates========')
 for e in edgeModelFinalStates:
     print(e.MLModel.titleModel + e.MLModel.modelExtension + ' - ' + e.FinalState.description)
-'''
-
-
-print('================================')
-print('==========Grafo Otimizado=============')
-print('================================')
-
-#sensors = ['acc','gyr']
-sensors = ['acc']
-graphOptimized = optimizeGraph(dao,sensors, 0.50)
-edgeSensorFeaturesO = graphOptimized[0]
-edgeFeatureModelsO = graphOptimized[1] 
-edgeModelFinalStatesO = graphOptimized[2]
-
-print("\n=======Cria Arquivo XML do Grafo Otimizado==========\n")
-xml_create(edgeSensorFeaturesO, edgeFeatureModelsO, edgeModelFinalStatesO, "KnowledgeBaseOptimized")
-
-'''
-print('======edgeSensorFeaturesO========')
-for e in edgeSensorFeaturesO:
-    print(e.Sensor.sensorName + ' - ' + e.Feature.featureName) 
-#print(edgeSensorFeatures)
-
-print('======edgeFeatureModelsO========')
-for e in edgeFeatureModelsO:
-    print(e.Feature.featureName + ' - ' + e.MLModel.titleModel + e.MLModel.modelExtension)
-    print(str(e.MLModel.numInFeature) + ' - ' + str(e.MLModel.numOutFeature))
-
-print('======edgeModelFinalStatesO========')
-for e in edgeModelFinalStatesO:
-    print(e.MLModel.titleModel + e.MLModel.modelExtension + ' - ' + e.FinalState.description)
-    print(str(e.MLModel.numInFeature) + ' - ' + str(e.MLModel.numOutFeature) + ' - ' + str(e.probability))
 '''

@@ -498,7 +498,11 @@
 </vFeature>
 <vModel>
 <inFeature>9</inFeature>
+<<<<<<< HEAD
 <modelName>acc_gyr_model.joblib</modelName>
+=======
+<modelName>LastANNModelACC.tflite</modelName>
+>>>>>>> eeb5917220c597d210aa641fd60679a975ad3772
 <outFeature>30</outFeature>
 </vModel>
 </EdgeFeatureModel>
@@ -512,7 +516,11 @@
 </vFeature>
 <vModel>
 <inFeature>9</inFeature>
+<<<<<<< HEAD
 <modelName>acc_gyr_model.joblib</modelName>
+=======
+<modelName>LastANNModelACC.tflite</modelName>
+>>>>>>> eeb5917220c597d210aa641fd60679a975ad3772
 <outFeature>30</outFeature>
 </vModel>
 </EdgeFeatureModel>
@@ -526,7 +534,11 @@
 </vFeature>
 <vModel>
 <inFeature>9</inFeature>
+<<<<<<< HEAD
 <modelName>acc_gyr_model.joblib</modelName>
+=======
+<modelName>LastANNModelACC.tflite</modelName>
+>>>>>>> eeb5917220c597d210aa641fd60679a975ad3772
 <outFeature>30</outFeature>
 </vModel>
 </EdgeFeatureModel>
@@ -540,7 +552,11 @@
 </vFeature>
 <vModel>
 <inFeature>9</inFeature>
+<<<<<<< HEAD
 <modelName>acc_gyr_model.joblib</modelName>
+=======
+<modelName>LastANNModelACC.tflite</modelName>
+>>>>>>> eeb5917220c597d210aa641fd60679a975ad3772
 <outFeature>30</outFeature>
 </vModel>
 </EdgeFeatureModel>
@@ -554,7 +570,11 @@
 </vFeature>
 <vModel>
 <inFeature>9</inFeature>
+<<<<<<< HEAD
 <modelName>acc_gyr_model.joblib</modelName>
+=======
+<modelName>LastANNModelACC.tflite</modelName>
+>>>>>>> eeb5917220c597d210aa641fd60679a975ad3772
 <outFeature>30</outFeature>
 </vModel>
 </EdgeFeatureModel>
@@ -568,7 +588,11 @@
 </vFeature>
 <vModel>
 <inFeature>9</inFeature>
+<<<<<<< HEAD
 <modelName>acc_gyr_model.joblib</modelName>
+=======
+<modelName>LastANNModelACC.tflite</modelName>
+>>>>>>> eeb5917220c597d210aa641fd60679a975ad3772
 <outFeature>30</outFeature>
 </vModel>
 </EdgeFeatureModel>
@@ -582,7 +606,11 @@
 </vFeature>
 <vModel>
 <inFeature>9</inFeature>
+<<<<<<< HEAD
 <modelName>acc_gyr_model.joblib</modelName>
+=======
+<modelName>LastANNModelACC.tflite</modelName>
+>>>>>>> eeb5917220c597d210aa641fd60679a975ad3772
 <outFeature>30</outFeature>
 </vModel>
 </EdgeFeatureModel>
@@ -596,7 +624,11 @@
 </vFeature>
 <vModel>
 <inFeature>9</inFeature>
+<<<<<<< HEAD
 <modelName>acc_gyr_model.joblib</modelName>
+=======
+<modelName>LastANNModelACC.tflite</modelName>
+>>>>>>> eeb5917220c597d210aa641fd60679a975ad3772
 <outFeature>30</outFeature>
 </vModel>
 </EdgeFeatureModel>
@@ -610,7 +642,11 @@
 </vFeature>
 <vModel>
 <inFeature>9</inFeature>
+<<<<<<< HEAD
 <modelName>acc_gyr_model.joblib</modelName>
+=======
+<modelName>LastANNModelACC.tflite</modelName>
+>>>>>>> eeb5917220c597d210aa641fd60679a975ad3772
 <outFeature>30</outFeature>
 </vModel>
 </EdgeFeatureModel>
@@ -1606,6 +1642,7 @@
 </vFinalStatus>
 <probability>0.760331</probability>
 </EdgeModelsFinalStatus>
+<<<<<<< HEAD
 <EdgeModelsFinalStatus>
 <vModel>
 <inFeature>9</inFeature>
@@ -1936,5 +1973,7 @@
 </vFinalStatus>
 <probability>0.585366</probability>
 </EdgeModelsFinalStatus>
+=======
+>>>>>>> eeb5917220c597d210aa641fd60679a975ad3772
 </edgeModelsFinalStatus>
 </KnowledgeRepresentation>

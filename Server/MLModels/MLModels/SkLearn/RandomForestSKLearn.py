@@ -10,6 +10,10 @@ from skl2onnx.common.data_types import FloatTensorType
 import subprocess
 import os
 import platform
+import tensorflow as tf
+from tensorflow import keras
+from os.path import join
+from pathlib import Path
 from Utilitarios import Constants
 pathProjectSaveModels = Constants.pathProjectSaveModels
 
@@ -54,6 +58,48 @@ def trainRandomForestModelAccGyr(threshold, testMin, testMax, preprocessingData)
         ( 'input_study_hours' , FloatTensorType( [None,1] ) ) 
     ]
 
+    ##pip install -q tflite_support
+    
+    '''
+    ##**Transfort to Tensorflow lite model**
+    # 2. Reimplement in Keras
+    saved_model = keras.Sequential([
+    keras.layers.Input(shape=(1,)),
+    keras.layers.Dense(units=1)  # Equivalent to linear regression
+    ])
+
+    # Transfer weights from sklearn to Keras (if applicable and compatible)
+    saved_model.layers[0].set_weights([resultModel.coef_.reshape(1,1), sklearn_model.intercept_])
+
+    #saved_model = convert_sklearn( resultModel , initial_types=initial_type )
+    pathModel = Constants.pathProjectSaveModels+ "\\RadomForest\\"
+
+    _TFLITE_MODEL_PATH = pathModel+"sklearn_model_rf.tflite"
+
+    converter = tf.lite.TFLiteConverter.from_saved_model(saved_model)
+    converter.optimizations = [tf.lite.Optimize.DEFAULT]
+    tflite_model = converter.convert()
+
+
+    with open(_TFLITE_MODEL_PATH, 'wb') as f:
+      f.write(tflite_model)
+
+    PATH_DIR = Path.cwd()
+    dataset_dir = PATH_DIR.joinpath(pathModel)
+    tflite_model_file = dataset_dir.joinpath("sklearn_model_rf.tflite"+'32')
+    tflite_model_file.write_bytes(tflite_model)
+
+    converter = tf.lite.TFLiteConverter.from_saved_model(saved_model)
+    converter.optimizations = [tf.lite.Optimize.DEFAULT]
+    converter.target_spec.supported_types = [tf.float16]
+    tflite_model = converter.convert()
+
+    PATH_DIR = Path.cwd()
+    dataset_dir = PATH_DIR.joinpath(pathModel)
+    tflite_model_file = dataset_dir.joinpath("sklearn_model_rf.tflite"+'16')
+    tflite_model_file.write_bytes(tflite_model)
+
+    '''
     # Write the ONNX model to disk
     converted_model = convert_sklearn( resultModel , initial_types=initial_type )
     with open( "sklearn_model_rf.onnx", "wb" ) as f:
@@ -113,6 +159,36 @@ def trainRandomForestModelAcc(threshold, testMin, testMax, preprocessingData):
     initial_type = [ 
         ( 'input_study_hours' , FloatTensorType( [None,1] ) ) 
     ]
+    '''
+    saved_model = convert_sklearn( resultModel , initial_types=initial_type )
+    pathModel = Constants.pathProjectSaveModels+ "\\RadomForest\\"
+
+    _TFLITE_MODEL_PATH = pathModel+"sklearn_model_rf2.tflite"
+
+    converter = tf.lite.TFLiteConverter.from_saved_model(saved_model)
+    converter.optimizations = [tf.lite.Optimize.DEFAULT]
+    tflite_model = converter.convert()
+
+
+    with open(_TFLITE_MODEL_PATH, 'wb') as f:
+      f.write(tflite_model)
+
+    PATH_DIR = Path.cwd()
+    dataset_dir = PATH_DIR.joinpath(pathModel)
+    tflite_model_file = dataset_dir.joinpath("sklearn_model_rf2.tflite"+'32')
+    tflite_model_file.write_bytes(tflite_model)
+
+    converter = tf.lite.TFLiteConverter.from_saved_model(saved_model)
+    converter.optimizations = [tf.lite.Optimize.DEFAULT]
+    converter.target_spec.supported_types = [tf.float16]
+    tflite_model = converter.convert()
+
+    PATH_DIR = Path.cwd()
+    dataset_dir = PATH_DIR.joinpath(pathModel)
+    tflite_model_file = dataset_dir.joinpath("sklearn_model_rf2.tflite"+'16')
+    tflite_model_file.write_bytes(tflite_model)
+
+    '''
 
     # Write the ONNX model to disk
     converted_model = convert_sklearn( resultModel , initial_types=initial_type )
@@ -132,5 +208,5 @@ def trainRandomForestModelAcc(threshold, testMin, testMax, preprocessingData):
         os.system('del sklearn_model_rf2.ort')
     if so == "Linux":
         os.system('mv sklearn_model_rf2.onnx '+pathProjectSaveModels+'\\RandomForest')
-        
+    
     return [resultModel,valueAccuracy]
