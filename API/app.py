@@ -1,7 +1,10 @@
 import sys
+import json
 from pathlib import Path
+from xml.parsers.expat import ExpatError
 
-from flask import Flask, send_file, send_from_directory
+from flask import Flask, jsonify, request, send_file, send_from_directory
+from API.converter import parse_xml
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -19,6 +22,7 @@ import Server.graphFunctions as gF
 app = Flask(__name__)
 app.config['DEBUG'] = True
 app.config['UPLOAD_FOLDER'] = str(MODEL_ROOT)
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 db = None
 dao = None
 modelText = ""
@@ -34,6 +38,50 @@ def get_dao():
 @app.route('/')
 def index():
     return 'execute'
+
+
+@app.route('/convert', methods=['POST'])
+def convert_endpoint():
+    file = request.files.get('file')
+    if file is None:
+        return jsonify(error='Nenhum arquivo enviado.'), 400
+    if not (file.filename or '').lower().endswith('.xml'):
+        return jsonify(error='O arquivo precisa ser XML.'), 400
+    try:
+        data = parse_xml(file.read().decode('utf-8-sig'))
+    except (UnicodeDecodeError, ExpatError):
+        return jsonify(error='Arquivo XML invalido ou fora da codificacao UTF-8.'), 400
+    return jsonify(json_content=json.dumps(data, ensure_ascii=False))
+
+
+def graph_response(path, prefer_json=False):
+    path = Path(path)
+    if request.args.get('format') == 'json' and prefer_json and path.with_suffix('.json').is_file():
+        try:
+            data = json.loads(path.with_suffix('.json').read_text(encoding='utf-8-sig'))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            return jsonify(error='O grafo salvo contem JSON invalido.'), 422
+        return jsonify(data)
+    if not path.is_file():
+        return jsonify(error='Grafo ainda nao disponivel.'), 404
+    if request.args.get('format') == 'json':
+        try:
+            data = parse_xml(path.read_text(encoding='utf-8-sig'))
+        except (UnicodeDecodeError, ExpatError):
+            return jsonify(error='O grafo salvo contem XML invalido.'), 422
+        return jsonify(data)
+    return send_file(path, as_attachment=True)
+
+
+@app.route('/saved_models')
+def list_models():
+    extensions = {'.tflite', '.tflite16', '.tflite32', '.onnx', '.joblib'}
+    models = sorted(
+        path.relative_to(MODEL_ROOT).as_posix()
+        for path in MODEL_ROOT.rglob('*')
+        if path.is_file() and path.suffix.lower() in extensions
+    )
+    return jsonify(models=models)
 
 @app.route('/UpdateGraphRequest/<id>')
 def updateGraphRequest(id=None):
@@ -52,35 +100,35 @@ def updateGraphRequest(id=None):
 
 @app.route('/OptimizeGraphRequest/<sensors>')
 def optimizeGraphRequest(sensors):
-    global modelText
-    print(id)
-    sensors = sensors.split("_")
-    graphOptimized = gF.optimizeGraph(get_dao(),sensors)
-    edgeSensorFeaturesO = graphOptimized[0]
-    edgeFeatureModelsO = graphOptimized[1] 
-    edgeModelFinalStatesO = graphOptimized[2]
-    xml_create(edgeSensorFeaturesO, edgeFeatureModelsO, edgeModelFinalStatesO, "KnowledgeBaseOptimized")
-    return downloadOptimizeGraph()
+    return optimized_graph_response(sensors)
 
 @app.route('/OptimizeGraphRequest/<sensors>/<percentage>')
 def optimizeGraphRequestPercentage(sensors,percentage):
-    global modelText
-    print(id)
-    sensors = sensors.split("_")
-    graphOptimized = gF.optimizeGraph(get_dao(),sensors,int(percentage)/100)
-    edgeSensorFeaturesO = graphOptimized[0]
-    edgeFeatureModelsO = graphOptimized[1] 
-    edgeModelFinalStatesO = graphOptimized[2]
-    xml_create(edgeSensorFeaturesO, edgeFeatureModelsO, edgeModelFinalStatesO, "KnowledgeBaseOptimized")
-    return downloadOptimizeGraph()
+    try:
+        percentage = int(percentage)
+    except ValueError:
+        return jsonify(error='Informe uma porcentagem inteira de 0 a 100.'), 400
+    if not 0 <= percentage <= 100:
+        return jsonify(error='Informe uma porcentagem inteira de 0 a 100.'), 400
+    return optimized_graph_response(sensors, percentage / 100)
+
+
+def optimized_graph_response(sensors, probability=0):
+    try:
+        edges = gF.optimizeGraph(get_dao(), sensors.lower().split('_'), probability)
+        path = xml_create(*edges, 'KnowledgeBaseOptimized')
+    except Exception:
+        app.logger.exception('Falha ao otimizar o grafo')
+        return jsonify(error='Falha ao otimizar. Verifique o banco de dados e os logs da API.'), 503
+    return graph_response(path)
 
 @app.route('/OptimizeGraphRequest/download.xml')
 def downloadOptimizeGraph():
-    return send_file(DOWNLOAD_ROOT / "KnowledgeBaseOptimized.xml", as_attachment=True)
+    return graph_response(DOWNLOAD_ROOT / 'KnowledgeBaseOptimized.xml')
     
 @app.route('/GraphRequest')
 def downloadGraph():
-    return send_file(DOWNLOAD_ROOT / "KnowledgeBase.xml", as_attachment=True)
+    return graph_response(DOWNLOAD_ROOT / 'KnowledgeBase.xml', prefer_json=True)
 
 @app.route('/saved_model/<path:filename>', methods=['GET', 'POST'])
 def download(filename):

@@ -1,6 +1,7 @@
 import shutil
 import sys
 import os
+from pathlib import Path
 from bs4 import BeautifulSoup
 from Utilitarios import Constants 
 
@@ -8,8 +9,9 @@ from Utilitarios import Constants
 def xml_create(edgeSensorFeature, edgeFeaturesModel, edgeModelsFinalStatus, fileName = Constants.graphName):
     #====================Arquivo===============
     feedFileName = fileName
-    path = Constants.pathProjectDownloads
-    feedFile = path+"\\"+feedFileName+".xml"
+    path = Path(__file__).resolve().parents[1] / 'download'
+    path.mkdir(parents=True, exist_ok=True)
+    feedFile = path / (feedFileName + '.xml')
     
     #====================Montar XML============
     ##====================Cabeçalho===============
